@@ -1,5 +1,8 @@
 using UnityEngine;
+using UnityEditor;
+using System;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace TestKinetix {
 
@@ -7,6 +10,7 @@ namespace TestKinetix {
     public class AnimatedCharacterController : MonoBehaviour
     {
         [Header("Emotes")]
+        [SerializeField] private Animation animation;
         [SerializeField] private Animator animator;
         [SerializeField] private AnimationClip legAnim;
 
@@ -34,6 +38,8 @@ namespace TestKinetix {
 
                 PlayHumanoidEmote();
             } else if (Input.GetKeyDown(KeyCode.T)) {
+                CancelEmotes();
+
                 StartCoroutine(PlayLegacyAnim());
             }
         }
@@ -50,7 +56,7 @@ namespace TestKinetix {
                 Quaternion wantedRotation = Quaternion.LookRotation(movementDirection, transform.up);
                 transform.rotation = Quaternion.Slerp(transform.rotation, wantedRotation, faceDirectionRatio);
 
-                CancelEmote();
+                CancelEmotes();
 
                 characterController.Move(movementDirection * walkSpeed * Time.deltaTime);   
             }            
@@ -65,7 +71,7 @@ namespace TestKinetix {
             animator.SetTrigger("PlayHumanoidEmote");
         }
 
-        private void CancelEmote()
+        private void CancelEmotes()
         {
             animator.SetTrigger("CancelEmotes");
             
@@ -76,19 +82,124 @@ namespace TestKinetix {
         private IEnumerator PlayLegacyAnim()
         {
             animator.enabled = false;
-            float animTimer = 0;
 
-            while (animTimer < legAnim.length) {
+            float animTimer = 0f;
+           
+
+            Dictionary<Transform, Dictionary<string, object>> bonesTargetProperties = new Dictionary<Transform, Dictionary<string, object>>();
+            Dictionary<Transform, Dictionary<string, object>> bonesOriginalProperties = new Dictionary<Transform, Dictionary<string, object>>();
+
+
+            foreach (var binding in AnimationUtility.GetCurveBindings(legAnim))
+            {
+                AnimationCurve curve = AnimationUtility.GetEditorCurve(legAnim, binding);
+                Transform targetBone = transform.Find(binding.path);
+
+                if (!bonesTargetProperties.ContainsKey(targetBone)) {
+                    bonesTargetProperties.Add(targetBone, new Dictionary<string, object>());
+                    bonesOriginalProperties.Add(targetBone, new Dictionary<string, object>());
+                }
+
+
+
+                string mainPropertyName = binding.propertyName;
+                string subPropertyName = null;
+
+                if (mainPropertyName.Contains("_")) {
+                    mainPropertyName = mainPropertyName.Replace("m_", "");
+                    mainPropertyName = Char.ToLowerInvariant(mainPropertyName[0]) + mainPropertyName.Substring(1);
+                }
+
+                if (mainPropertyName.Contains(".")) {
+                    string[] splitProp = mainPropertyName.Split('.');
+
+                    mainPropertyName = splitProp[0];
+                    subPropertyName = splitProp[1];
+                }
+
+
+
+                System.Reflection.PropertyInfo? targetBoneProp = typeof(Transform).GetProperty(mainPropertyName);
+
+                // If the property does not exist yet, initialize it with the current value for the bone
+                if (!bonesTargetProperties[targetBone].ContainsKey(mainPropertyName)) {
+                    bonesTargetProperties[targetBone].Add(mainPropertyName, targetBoneProp.GetValue(targetBone));
+                    bonesOriginalProperties[targetBone].Add(mainPropertyName, targetBoneProp.GetValue(targetBone));
+                }
+
+                if (subPropertyName != null) {
+                    System.Reflection.FieldInfo? targetBoneSubProp = targetBoneProp.PropertyType.GetField(subPropertyName);
+                    object cProp = bonesTargetProperties[targetBone][mainPropertyName];
+
+                    targetBoneSubProp.SetValue(cProp, (float) curve.Evaluate(0));
+                    
+                    bonesTargetProperties[targetBone][mainPropertyName] = cProp;
+                }                
+            }
+
+
+            yield return BlendTo(bonesTargetProperties);
+
+
+            while (animTimer < legAnim.length)
+            {
+                animTimer += Time.deltaTime;
+
                 legAnim.SampleAnimation(gameObject, animTimer);
 
-                yield return new WaitForEndOfFrame();
-
-                animTimer += Time.deltaTime;
+                yield return new WaitForEndOfFrame();                
             }
+
+            
+            yield return BlendTo(bonesOriginalProperties);
 
             animator.enabled = true;
         }
 
+        private IEnumerator BlendTo(Dictionary<Transform, Dictionary<string, object>> bonesTargetProperties)
+        {
+            float interpolationTimer = 0;
+            float interpolationDesiredTime = 0.5f;
+
+            while (interpolationTimer < interpolationDesiredTime)
+            {
+                interpolationTimer += Time.deltaTime;
+
+                foreach (KeyValuePair<Transform, Dictionary<string, object>> boneProperties in bonesTargetProperties)
+                {
+                    // Assign var for readability
+                    Transform targetBone = boneProperties.Key;
+
+                    foreach (KeyValuePair<string, object> property in boneProperties.Value)
+                    {
+                        System.Reflection.PropertyInfo? bonePropertyInfo = typeof(Transform).GetProperty(property.Key);
+
+                        object interpolatedProperty = property.Value;
+                        object currentBonePropValue = bonePropertyInfo.GetValue(targetBone);
+
+                        float timeRatio = interpolationTimer / interpolationDesiredTime;
+
+
+                        switch (bonePropertyInfo.PropertyType.ToString()) {
+                            case "UnityEngine.Vector3":
+                                interpolatedProperty = Vector3.Slerp((Vector3) currentBonePropValue, (Vector3) property.Value, timeRatio);
+                            break;
+                            case "UnityEngine.Quaternion":
+                                interpolatedProperty = Quaternion.Slerp((Quaternion) currentBonePropValue, (Quaternion) property.Value, timeRatio);
+                            break;
+                        }
+
+                        bonePropertyInfo.SetValue(targetBone, interpolatedProperty);
+                    }
+                }
+
+                yield return new WaitForEndOfFrame();
+            }
+        }
+
         #endregion
     }
+
+
+    
 }

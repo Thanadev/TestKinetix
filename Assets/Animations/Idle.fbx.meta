@@ -6,6 +6,9 @@ ModelImporter:
   - first:
       74: -203655887218126122
     second: Breathing Idle
+  - first:
+      74: 5587989974262132061
+    second: Breathing legacy
   externalObjects: {}
   materials:
     materialImportMode: 2
