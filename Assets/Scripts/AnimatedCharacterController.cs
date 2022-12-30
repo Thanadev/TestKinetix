@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 namespace TestKinetix {
 
@@ -7,6 +8,7 @@ namespace TestKinetix {
     {
         [Header("Emotes")]
         [SerializeField] private Animator animator;
+        [SerializeField] private AnimationClip legAnim;
 
         
         [Header("Movement")]
@@ -31,6 +33,8 @@ namespace TestKinetix {
                 animator.ResetTrigger("CancelEmotes");
 
                 PlayHumanoidEmote();
+            } else if (Input.GetKeyDown(KeyCode.T)) {
+                StartCoroutine(PlayLegacyAnim());
             }
         }
 
@@ -64,6 +68,25 @@ namespace TestKinetix {
         private void CancelEmote()
         {
             animator.SetTrigger("CancelEmotes");
+            
+            animator.enabled = true;
+            StopCoroutine(PlayLegacyAnim());
+        }
+
+        private IEnumerator PlayLegacyAnim()
+        {
+            animator.enabled = false;
+            float animTimer = 0;
+
+            while (animTimer < legAnim.length) {
+                legAnim.SampleAnimation(gameObject, animTimer);
+
+                yield return new WaitForEndOfFrame();
+
+                animTimer += Time.deltaTime;
+            }
+
+            animator.enabled = true;
         }
 
         #endregion

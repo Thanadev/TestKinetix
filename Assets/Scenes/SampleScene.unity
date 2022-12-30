@@ -293,6 +293,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 681335396}
+  legAnim: {fileID: 7400000, guid: 81d1865ed122647f0bf3581ac823bfc5, type: 2}
   cameraOrbiter: {fileID: 530932143}
   walkSpeed: 1
   faceDirectionRatio: 0.01
@@ -593,6 +594,10 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 917058816620216625, guid: ea16a4ced840c44a1af424290b3f088e, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5841714463514051057, guid: ea16a4ced840c44a1af424290b3f088e, type: 3}
       propertyPath: m_Name
       value: Character
