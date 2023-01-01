@@ -23,6 +23,8 @@ namespace TestKinetix
         private CharacterController characterController;
         private PlayerAnimationController animController;
 
+        private bool canMove = true;
+
         private void Awake()
         {
             characterController = GetComponent<CharacterController>();
@@ -34,14 +36,26 @@ namespace TestKinetix
             Move();            
         }
 
+        public void EnableMovement()
+        {
+            canMove = true;
+        }
+
+        public void DisableMovement()
+        {
+            canMove = false;
+        }
+
+
         private void Move()
         {
+
             movementDirection = new Vector3(Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical")).normalized;
 
             // Delegate animation to animController
-            animController.OnMove(movementDirection.magnitude);
+            StartCoroutine(animController.OnMove(movementDirection.magnitude, EnableMovement));
 
-            if (movementDirection.magnitude > 0) {
+            if (movementDirection.magnitude > 0 && canMove) {
                 // Determine the direction of movement
                 movementDirection = cameraOrbiter.TransformDirection(movementDirection) * -1;
                 

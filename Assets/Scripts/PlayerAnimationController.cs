@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -10,49 +11,55 @@ namespace TestKinetix
         [SerializeField] private Animator animator;
         [SerializeField] private AnimationClip legAnim;
 
-        private BlendedLegacyAnimation legacyEmote;
+        private LegacyEmote legacyEmote;
+        private AnimatorEmote animatorEmote;
+
+        private PlayerMovementController movementController;
 
         private void Awake()
         {
-            legacyEmote = new BlendedLegacyAnimation(legAnim, new AnimationContext(transform, animator));
+            legacyEmote = new LegacyEmote(legAnim, new AnimationContext(transform, animator, this));
+            animatorEmote = new AnimatorEmote("PlayHumanoidEmote", "CancelEmotes", new AnimationContext(transform, animator, this));
+            movementController = GetComponent<PlayerMovementController>();
+
         }
 
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.R)) {
-                animator.ResetTrigger("CancelEmotes");
-
-                PlayHumanoidEmote();
+                PlayEmote(animatorEmote);
             } else if (Input.GetKeyDown(KeyCode.T)) {
-                CancelEmotes();
-
-                StartCoroutine(legacyEmote.Play());
+                PlayEmote(legacyEmote);
             }
         }
 
-        #region Emotes
 
-        public void OnMove(float magnitude)
+        #region Animation callback
+
+        public void PlayEmote(IEmote emote)
         {
-            animator.SetFloat("MoveMagnitude", magnitude);
+            if (animator.GetFloat("MoveMagnitude") == 0) {
+                CancelEmotes();
+                movementController.DisableMovement();
 
+                emote.Play();
+            }
+        }
+
+        public IEnumerator OnMove(float magnitude, Action onTransitionFinishedCallback)
+        {
             if (magnitude > 0) {
-                CancelEmotes();
+                yield return CancelEmotes();
+                onTransitionFinishedCallback();
             }
+
+            animator.SetFloat("MoveMagnitude", magnitude);
         }
 
-        public void CancelEmotes()
+        public IEnumerator CancelEmotes()
         {
-            animator.SetTrigger("CancelEmotes");
-            
-            animator.enabled = true;
-            StopCoroutine(legacyEmote.Play());
-        }
-
-
-        private void PlayHumanoidEmote()
-        {
-            animator.SetTrigger("PlayHumanoidEmote");
+            yield return animatorEmote.Cancel();            
+            yield return legacyEmote.Cancel();
         }
 
         #endregion
