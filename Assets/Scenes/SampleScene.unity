@@ -270,11 +270,20 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 5841714463514051057, guid: ea16a4ced840c44a1af424290b3f088e, type: 3}
   m_PrefabInstance: {fileID: 6760071864461131761}
   m_PrefabAsset: {fileID: 0}
---- !u!111 &681335395 stripped
-Animation:
-  m_CorrespondingSourceObject: {fileID: 6760071863198631837, guid: ea16a4ced840c44a1af424290b3f088e, type: 3}
-  m_PrefabInstance: {fileID: 6760071864461131761}
+--- !u!114 &681335395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 681335394}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82dc5260fce7df04f8384e2936f0e934, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 681335396}
+  legAnim: {fileID: 7400000, guid: 81d1865ed122647f0bf3581ac823bfc5, type: 2}
 --- !u!95 &681335396 stripped
 Animator:
   m_CorrespondingSourceObject: {fileID: 917058816620216625, guid: ea16a4ced840c44a1af424290b3f088e, type: 3}
@@ -297,9 +306,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c3aaf9c14266b8e4abe542beb6f323c8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  animation: {fileID: 681335395}
-  animator: {fileID: 681335396}
-  legAnim: {fileID: 7400000, guid: 81d1865ed122647f0bf3581ac823bfc5, type: 2}
   cameraOrbiter: {fileID: 530932143}
   walkSpeed: 1
   faceDirectionRatio: 0.01
@@ -676,5 +682,6 @@ PrefabInstance:
       propertyPath: m_Animations.Array.data[2]
       value: 
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 6760071863198631837, guid: ea16a4ced840c44a1af424290b3f088e, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: ea16a4ced840c44a1af424290b3f088e, type: 3}
