@@ -57,6 +57,7 @@ namespace TestKinetix
         {
             Dictionary<Transform, Dictionary<string, object>> boneBackUpProperties = new Dictionary<Transform, Dictionary<string, object>>();
 
+            // Just reading the properties that are going to change and saving the current value
             foreach (KeyValuePair<Transform, Dictionary<string, object>> targetBoneProps in bonesTargetProperties)
             {
                 // Assign var for readability

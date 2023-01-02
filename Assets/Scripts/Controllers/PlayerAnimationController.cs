@@ -20,8 +20,8 @@ namespace TestKinetix
         {
             legacyEmote = new LegacyEmote(legAnim, new AnimationContext(transform, animator, this));
             animatorEmote = new AnimatorEmote("PlayHumanoidEmote", "CancelEmotes", new AnimationContext(transform, animator, this));
+            
             movementController = GetComponent<PlayerMovementController>();
-
         }
 
         private void Update()
@@ -38,6 +38,7 @@ namespace TestKinetix
 
         public void PlayEmote(IEmote emote)
         {
+            // Play emote only if we're not moving
             if (animator.GetFloat("MoveMagnitude") == 0) {
                 CancelEmotes();
                 movementController.DisableMovement();
@@ -48,11 +49,13 @@ namespace TestKinetix
 
         public IEnumerator OnMove(float magnitude, Action onTransitionFinishedCallback)
         {
+            // Cancel the animations and allow movement again
             if (magnitude > 0) {
                 yield return CancelEmotes();
                 onTransitionFinishedCallback();
             }
 
+            // We blended back to our previous state, play the walk anim
             animator.SetFloat("MoveMagnitude", magnitude);
         }
 
