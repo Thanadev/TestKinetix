@@ -16,7 +16,7 @@ So around **12h** to fully perform the exercise
 
 **Getting the keyframes**
 
-I tried to find a way to get animation curves / keyframes at runtime but after a lot of reasearch, the only answer I found to that is that Unity is not providing any means to do it at runtime, only in Editor using AnimationUtility.
+I tried to find a way to get animation curves / keyframes at runtime but after a lot of research, the only answer I found to that is that Unity is not providing any means to do it at runtime, only in Editor using AnimationUtility.
 
 So in a production environment, we would have to already have the keyframes serialized to be able to achieve a blending like expected for the legacy animations.
 
@@ -48,11 +48,11 @@ Instead of creating the emotes in the AnimationController, create an EmoteProvid
 
 **Remove the division per 10 in the LinearInterpolator**
 
-Weirdly, the interpolation seems to be finished way before the timeRatio of the Lerp function gets to 1. Maybe there is an easing ? Didn’t have time to look more into it and created the illusion by dividing by ten (sorry, magic number).
+Weirdly, the interpolation seems to be finished way before the timeRatio of the Lerp function gets to 1. Maybe there is an easing? Didn’t have time to look more into it and created the illusion by dividing by ten (sorry, magic number).
 
 **Use UnityEvent for OnMove**
 
-Currently the AnimationController and the MovementController reference each other. We could use UnityEvents instead, allowing other systems to listen to movement instead.
+Currently the AnimationController and the MovementController reference each other. We could use UnityEvents instead, allowing other systems to listen to movement.
 
 **Continue to implement interfaces and providers for ClipReaders and Interpolators**
 
@@ -76,7 +76,7 @@ Instead of putting the properties as “public” to show them in the inspector,
 
 **No underscore**
 
-As written in the documentation of Unity in the code example, I usually don’t put underscores before the name of my private variables. This is mostly due to my experience in web development and the coding style I acquired.
+As written in the documentation of Unity in the code examples, I usually don’t put underscores before the name of my private variables. This is mostly due to my experience in software/web development and the coding style I acquired.
 
 That said, I fully understand that it depends on the existing codebase and the usual C# way of doing it is “m_” or just the underscore.
 
